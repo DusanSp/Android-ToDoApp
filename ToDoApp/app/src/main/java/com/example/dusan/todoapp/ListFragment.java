@@ -1,6 +1,8 @@
 package com.example.dusan.todoapp;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,8 +13,6 @@ import android.view.ViewGroup;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class ListFragment extends Fragment {
@@ -23,10 +23,7 @@ public class ListFragment extends Fragment {
   FloatingActionButton mButtonAdd;
 
   private LinearLayoutManager mLayoutManager;
-  private List<String> mItemList = new ArrayList<>();
   private ListViewAdapter mListViewAdapter;
-
-  int i = 0;
 
 
   @Override
@@ -39,8 +36,11 @@ public class ListFragment extends Fragment {
     mLayoutManager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager(mLayoutManager);
 
-    mListViewAdapter = new ListViewAdapter(mItemList);
+    mListViewAdapter = new ListViewAdapter(getActivity());
     mRecyclerView.setAdapter(mListViewAdapter);
+
+    Model mModel = new Model(getActivity());
+    mListViewAdapter.updateAdapterData(mModel.loadFromSharedPreferences());
 
     return view;
   }
@@ -48,8 +48,16 @@ public class ListFragment extends Fragment {
   @OnClick(R.id.btn_add)
   public void AddItem()
   {
-    mItemList.add("item " + i);
-    i++;
-    mListViewAdapter.notifyDataSetChanged();
+    AddItemFragment addItemFragment = new AddItemFragment();
+    FragmentManager fragmentManager = getFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+    fragmentTransaction.replace(R.id.fragment_holder, addItemFragment);
+    fragmentTransaction.addToBackStack(null);
+    fragmentTransaction.commit();
+  }
+
+  public void updateListView()
+  {
+    // mListViewAdapter.updateAdapterData();
   }
 }
