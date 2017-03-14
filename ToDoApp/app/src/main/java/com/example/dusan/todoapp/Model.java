@@ -12,7 +12,6 @@ import java.util.List;
 public class Model {
 
   private final String STORE_NAME = "ToDoApp";
-  private List<String> mToDoList = new ArrayList<>();
   private Context mContext;
 
 
@@ -21,41 +20,54 @@ public class Model {
     this.mContext = context;
   }
 
-  public List<String> getToDoList() {
-    return mToDoList;
+  public void addNewReminder(String newReminder)
+  {
+    List<String> savedList = loadFromSharedPreferences();
+    savedList.add(newReminder);
+    saveToSharedPreferences(savedList);
   }
 
-  public void setToDoList(List<String> mToDoList) {
-    this.mToDoList = mToDoList;
+  public List<String> getReminderList()
+  {
+    return loadFromSharedPreferences();
   }
 
-  public void addItemToList(String item) {
-    mToDoList.add(item);
+  public void removeItemFromList(int position)
+  {
+    List<String> savedList = loadFromSharedPreferences();
+    String item = savedList.get(position);
+    if(savedList.contains(item))
+    {
+      savedList.remove(position);
+      saveToSharedPreferences(savedList);
+    }
   }
 
-  public void saveToSharedPreferences()
+  private void saveToSharedPreferences(List<String> saveList)
   {
     SharedPreferences sharedPreferences =
         mContext.getSharedPreferences(STORE_NAME, Context.MODE_PRIVATE);
     SharedPreferences.Editor editor = sharedPreferences.edit();
 
     Gson gson = new Gson();
-    String json = gson.toJson(mToDoList);
+    String json = gson.toJson(saveList);
 
     editor.putString(STORE_NAME, json);
     editor.apply();
   }
 
-  public List<String> loadFromSharedPreferences()
+  private List<String> loadFromSharedPreferences()
   {
     SharedPreferences sharedPreferences =
         mContext.getSharedPreferences(STORE_NAME, Context.MODE_PRIVATE);
     String json = sharedPreferences.getString(STORE_NAME, "");
     Gson gson = new Gson();
     Type type = new TypeToken<List<String>>() {}.getType();
-    mToDoList = gson.fromJson(json, type);
-    if(mToDoList == null)
-      mToDoList = new ArrayList<>();
-    return mToDoList;
+
+    List<String> list;
+    list = gson.fromJson(json, type);
+    if(list == null)
+      list = new ArrayList<>();
+    return list;
   }
 }

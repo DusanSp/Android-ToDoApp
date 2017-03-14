@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +27,7 @@ public class ListFragment extends Fragment {
 
   private LinearLayoutManager mLayoutManager;
   private ListViewAdapter mListViewAdapter;
+  private Model mModel;
 
 
   @Override
@@ -36,11 +40,13 @@ public class ListFragment extends Fragment {
     mLayoutManager = new LinearLayoutManager(getActivity());
     mRecyclerView.setLayoutManager(mLayoutManager);
 
-    mListViewAdapter = new ListViewAdapter(getActivity());
+    mListViewAdapter = new ListViewAdapter();
     mRecyclerView.setAdapter(mListViewAdapter);
 
-    Model mModel = new Model(getActivity());
-    mListViewAdapter.updateAdapterData(mModel.loadFromSharedPreferences());
+    mModel = new Model(getActivity());
+    mListViewAdapter.updateAdapterData(mModel.getReminderList());
+
+    setUpItemSwipe();
 
     return view;
   }
@@ -56,8 +62,32 @@ public class ListFragment extends Fragment {
     fragmentTransaction.commit();
   }
 
-  public void updateListView()
+  private void setUpItemSwipe()
   {
-    // mListViewAdapter.updateAdapterData();
+    ItemTouchHelper.SimpleCallback simpleCallback = new SimpleCallback(0, ItemTouchHelper.LEFT) {
+      @Override
+      public boolean onMove(RecyclerView recyclerView, ViewHolder viewHolder, ViewHolder target) {
+        return false;
+      }
+
+      @Override
+      public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+
+        return super.getSwipeDirs(recyclerView, viewHolder);
+      }
+
+      @Override
+      public void onSwiped(ViewHolder viewHolder, int direction) {
+        ListViewAdapter listViewAdapter = (ListViewAdapter) mRecyclerView.getAdapter();
+        int swipedPosition = viewHolder.getAdapterPosition();
+        boolean removed = listViewAdapter.removeListItem(swipedPosition);
+        if(removed)
+        {
+          mModel.removeItemFromList(swipedPosition);
+        }
+      }
+    };
+    ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(simpleCallback);
+    mItemTouchHelper.attachToRecyclerView(mRecyclerView);
   }
 }

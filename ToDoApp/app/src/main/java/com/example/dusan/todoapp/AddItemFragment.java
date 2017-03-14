@@ -35,8 +35,16 @@ public class AddItemFragment extends Fragment {
   public void onClickAdd()
   {
     String text = mEditText.getText().toString();
-    mModel.addItemToList(text);
-    mModel.saveToSharedPreferences();
+    mModel.addNewReminder(text);
+
+    showListFragment();
+  }
+
+  @OnClick(R.id.btn_close)
+  public void onClickClose()
+  {
+    mEditText.setText("");
+    mEditText.clearFocus();
 
     showListFragment();
   }
@@ -44,7 +52,6 @@ public class AddItemFragment extends Fragment {
   private void showListFragment()
   {
     ListFragment listFragment = new ListFragment();
-    listFragment.updateListView();
     FragmentManager fragmentManager = getFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
     fragmentTransaction.replace(R.id.fragment_holder, listFragment);

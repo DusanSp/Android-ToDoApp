@@ -1,8 +1,6 @@
 package com.example.dusan.todoapp;
 
-import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +10,11 @@ import java.util.List;
 
 public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
 
-  private List<String> mItemList = new ArrayList<>();
-  private Model model;
+  private List<String> mItemList;
 
-  public ListViewAdapter(Activity activity)
+  public ListViewAdapter()
   {
-    model = new Model(activity);
-    mItemList = model.loadFromSharedPreferences();
+    mItemList = new ArrayList<>();
   }
 
   @Override
@@ -43,7 +39,25 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
 
   public void updateAdapterData(List<String> list)
   {
-    this.mItemList = list;
-    notifyDataSetChanged();
+    if(!list.isEmpty())
+    {
+      this.mItemList = list;
+      notifyDataSetChanged();
+    }
+  }
+
+  public boolean removeListItem(int position)
+  {
+    String item = mItemList.get(position);
+    if(mItemList.contains(item))
+    {
+      mItemList.remove(position);
+      notifyItemRemoved(position);
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
 }
